@@ -1,0 +1,131 @@
+name: CI/CD
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main, develop ]
+  workflow_dispatch:
+
+env:
+  GO_VERSION: "1.27.1"
+  CGO_ENABLED: 0
+
+jobs:
+  test:
+    name: Test
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: ${{ env.GO_VERSION }}
+      
+      - name: Install dependencies
+        run: go mod tidy
+      
+      - name: Run tests
+        run: go test ./... -v
+      
+      - name: Build agent
+        run: go build -o yara-scanner-agent ./cmd/agent
+
+  build-windows:
+    name: Build Windows (amd64)
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: ${{ env.GO_VERSION }}
+      
+      - name: Install dependencies
+        run: go mod tidy
+      
+      - name: Build Windows agent
+        run: |
+          CGO_ENABLED=0 GOOS=windows GOARCH=amd64 go build -o yara-scanner-agent.exe ./cmd/agent
+        env:
+          CGO_ENABLED: 0
+      
+      - name: Upload Windows binary
+        uses: actions/upload-artifact@v4
+        with:
+          name: yara-scanner-agent-windows-amd64
+          path: yara-scanner-agent.exe
+          retention-days: 7
+
+  build-linux:
+    name: Build Linux (amd64)
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: ${{ env.GO_VERSION }}
+      
+      - name: Install dependencies
+        run: go mod tidy
+      
+      - name: Build Linux agent
+        run: |
+          go build -o yara-scanner-agent ./cmd/agent
+      
+      - name: Upload Linux binary
+        uses: actions/upload-artifact@v4
+        with:
+          name: yara-scanner-agent-linux-amd64
+          path: yara-scanner-agent
+          retention-days: 7
+
+  lint:
+    name: Lint
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: ${{ env.GO_VERSION }}
+      
+      - name: Run golangci-lint
+        uses: golangci/golangci-lint-action@v6
+        with:
+          version: latest
+          args: --timeout=5m
+
+  verify:
+    name: Verify
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: ${{ env.GO_VERSION }}
+      
+      - name: Verify module
+        run: go mod verify
+      
+      - name: Check formatting
+        run: |
+          go fmt ./...
+          git diff --exit-code || (echo "Code not formatted" && exit 1)

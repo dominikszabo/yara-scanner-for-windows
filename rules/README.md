@@ -1,0 +1,55 @@
+# YARA Rules
+
+This directory contains YARA rule files that define what the scanner looks for during endpoint scanning.
+
+## Ruleset Sources
+
+You can use rules from various sources:
+
+- [YARA-Sigs](https://github.com/Yara-Rules/rules)
+- [Flare-VM](https://github.com/fireeye/flare-vm)
+- [GitHub YARA rules](https://github.com/search?q=yara+rules)
+
+## Rule Format
+
+Each `.yar` file can contain multiple rules:
+
+```yara
+rule RuleName {
+    meta:
+        description = "Description here"
+        author = "Your Name"
+        severity = "high"
+    strings:
+        $string1 = "malicious string"
+    condition:
+        $string1
+}
+```
+
+## File Naming
+
+- Use `.yar` or `.yara` extension
+- Group rules by category (malware.yar, suspicious.yar, custom.yar)
+- Keep files focused (one threat type per file)
+
+## Loading Rules
+
+The agent loads all `.yar`/.yara` files in this directory at startup. Multiple rule files are merged automatically.
+
+## Example Rule
+
+```yara
+rule TestRule {
+    meta:
+        description = "Example test rule"
+        author = "YARA Scanner"
+        severity = "low"
+    
+    strings:
+        $test = "test-string"
+    
+    condition:
+        $test
+}
+```

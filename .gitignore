@@ -1,0 +1,59 @@
+# YARA
+yara.exe
+yara64.exe
+yarac.exe
+yara*.exe
+
+# Go
+go.sum
+*.exe
+*.dll
+*.so
+*.dylib
+
+# Test binary, build with `go test -c`
+*.test
+
+# Output directories
+bin/
+dist/
+output/
+
+# Binary output
+yara-scanner-agent
+yara-scanner-agent.exe
+
+# Environment variables
+.env
+.env.local
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Log files
+*.log
+logs/
+
+# Temporary files
+tmp/
+temp/
+*.tmp
+
+# Build artifacts
+*.o
+*.a
+*.so
+*.dylib
+
+# Windows specific
+*.pdb
+*.manifest
+*.res
